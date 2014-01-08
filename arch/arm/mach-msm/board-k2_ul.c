@@ -3484,7 +3484,7 @@ static void __init k2_ul_init(void)
 
 
 #ifdef CONFIG_CPU_FREQ_GOV_ONDEMAND_2_PHASE
-	set_two_phase_freq(1026000);
+	set_two_phase_freq(918000);
 #endif
 
 	k2_ul_init_keypad();

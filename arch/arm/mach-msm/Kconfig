@@ -1752,6 +1752,19 @@ config MSM_CPU_FREQ_MIN
 
 endif # CPU_FREQ_MSM
 
+
+config CPU_OVERCLOCK
+        bool "Enable CPU Overclocking option"
+        default n
+        help
+          Qualcomm overclocking up to 1.5 GHz
+
+config GPU_OVERCLOCK
+        bool "Enable GPU Overclocking option"
+        default n
+        help
+          Qualcomm GPU overclocking to 450 MHz
+
 config MSM_AVS_HW
 	bool "Enable Adaptive Voltage Scaling (AVS)"
 	default n

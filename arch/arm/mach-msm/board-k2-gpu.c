@@ -123,7 +123,11 @@ static struct kgsl_device_iommu_data kgsl_3d0_iommu_data[] = {
 static struct kgsl_device_platform_data kgsl_3d0_pdata = {
 	.pwrlevel = {
 		{
+#ifdef CONFIG_GPU_OVERCLOCK
+			.gpu_freq = 450000000,
+#else
 			.gpu_freq = 400000000,
+#endif
 			.bus_freq = 3,
 			.io_fraction = 0,
 		},

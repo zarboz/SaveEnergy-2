@@ -196,6 +196,8 @@ ARCH		?= $(SUBARCH)
 CROSS_COMPILE	?= $(CONFIG_CROSS_COMPILE:"%"=%)
 ARCH		:= arm
 CROSS_COMPILE	:= arm-eabi-
+#CROSS_COMPILE	:= arm-linux-gnueabihf-
+#CROSS_COMPILE	:= armv7a-hardfloat-linux-gnueabi-
 
 # Architecture as present in compile.h
 UTS_MACHINE 	:= $(ARCH)
@@ -356,7 +358,7 @@ CHECKFLAGS     := -D__linux__ -Dlinux -D__STDC__ -Dunix -D__unix__ \
 CFLAGS_MODULE   = -Os -fno-pic -munaligned-access
 AFLAGS_MODULE   =
 LDFLAGS_MODULE  = 
-CFLAGS_KERNEL	= -marm -march=armv7-a -mtune=cortex-a9 -munaligned-access -mtls-dialect=gnu2
+CFLAGS_KERNEL	= -marm -mcpu=cortex-a15 -mtune=cortex-a9 -ftree-vectorize -munaligned-access -mtls-dialect=gnu2
 AFLAGS_KERNEL	= 
 CFLAGS_GCOV	= -fprofile-arcs -ftest-coverage
 
@@ -564,9 +566,9 @@ endif # $(dot-config)
 all: vmlinux
 
 ifdef CONFIG_CC_OPTIMIZE_FOR_SIZE
-KBUILD_CFLAGS	+= -Os 
+KBUILD_CFLAGS	+= -Os -falign-functions -falign-jumps -falign-loops -falign-labels -freorder-blocks
 else
-KBUILD_CFLAGS	+= -O2 -fno-reorder-blocks-and-partition
+KBUILD_CFLAGS	+= -O2 -fno-reorder-blocks-and-partition #-floop-interchange -ftree-loop-distribution -floop-strip-mine -floop-block
 endif
 include $(srctree)/arch/$(SRCARCH)/Makefile
 
