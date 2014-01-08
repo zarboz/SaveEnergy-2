@@ -459,6 +459,11 @@ void msm_pm_set_max_sleep_time(int64_t max_sleep_time_ns)
 }
 EXPORT_SYMBOL(msm_pm_set_max_sleep_time);
 
+struct reg_data {
+  uint32_t reg;
+  uint32_t val;
+};
+
 static unsigned int *radio_info_addr;
 
 void msm_pm_radio_info_init(unsigned int *addr)
@@ -478,7 +483,6 @@ void radio_stat_dump(void)
 	}
 	printk(KERN_INFO "radio_info_stat: %d, %d\n", garbage, syncack);
 }
-
 
 static struct msm_rpmrs_limits *msm_pm_idle_rs_limits;
 static bool msm_pm_use_qtimer;
@@ -645,13 +649,16 @@ static bool __ref msm_pm_spm_power_collapse(
 static bool msm_pm_power_collapse_standalone(bool from_idle)
 {
 	unsigned int cpu = smp_processor_id();
-	unsigned int avsdscr_setting;
+  unsigned int avsdscr;
+  unsigned int avscsr;
 	bool collapsed;
 
-	avsdscr_setting = avs_get_avsdscr();
-	avs_disable();
+  avsdscr = avs_get_avsdscr();
+  avscsr = avs_get_avscsr();
+  avs_set_avscsr(0); /* Disable AVS */
 	collapsed = msm_pm_spm_power_collapse(cpu, from_idle, false);
-	avs_reset_delays(avsdscr_setting);
+  avs_set_avsdscr(avsdscr);
+  avs_set_avscsr(avscsr);
 	return collapsed;
 }
 
@@ -659,7 +666,8 @@ static bool msm_pm_power_collapse(bool from_idle)
 {
 	unsigned int cpu = smp_processor_id();
 	unsigned long saved_acpuclk_rate;
-	unsigned int avsdscr_setting;
+  unsigned int avsdscr;
+  unsigned int avscsr;
 	bool collapsed;
 	struct clk *clk, *parent_clk;
 	int blk_xo_vddmin_count = 0;
@@ -705,8 +713,9 @@ static bool msm_pm_power_collapse(bool from_idle)
 	if (MSM_PM_DEBUG_POWER_COLLAPSE & msm_pm_debug_mask)
 		pr_info("CPU%u: %s: pre power down\n", cpu, __func__);
 
-	avsdscr_setting = avs_get_avsdscr();
-	avs_disable();
+  avsdscr = avs_get_avsdscr();
+  avscsr = avs_get_avscsr();
+  avs_set_avscsr(0); /* Disable AVS */
 
 	if (cpu_online(cpu))
 		saved_acpuclk_rate = acpuclk_power_collapse();
@@ -747,7 +756,8 @@ static bool msm_pm_power_collapse(bool from_idle)
 	}
 
 
-	avs_reset_delays(avsdscr_setting);
+  avs_set_avsdscr(avsdscr);
+  avs_set_avscsr(avscsr);
 	msm_pm_config_hw_after_power_up();
 	if (MSM_PM_DEBUG_POWER_COLLAPSE & msm_pm_debug_mask)
 		pr_info("CPU%u: %s: post power up\n", cpu, __func__);
