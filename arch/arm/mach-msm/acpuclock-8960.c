@@ -1870,6 +1870,52 @@ static void __init bus_init(unsigned int init_bw)
 		pr_err("initial bandwidth request failed (%d)\n", ret);
 }
 
+#ifdef CONFIG_USERSPACE_VOLTAGE_CONTROL
+
+#define HFPLL_MIN_VDD     700000
+#define HFPLL_MAX_VDD    1350000
+
+ssize_t acpuclk_get_vdd_levels_str(char *buf) {
+
+  int i, len = 0;
+
+  if (buf) {
+    mutex_lock(&driver_lock);
+
+    for (i = 0; acpu_freq_tbl[i].speed.khz; i++) {
+      len += sprintf(buf + len, "%8u: %8d\n", acpu_freq_tbl[i].speed.khz,
+        acpu_freq_tbl[i].vdd_core );
+    }
+
+    mutex_unlock(&driver_lock);
+  }
+  return len;
+}
+
+void acpuclk_set_vdd(unsigned int khz, int vdd_uv) {
+
+  int i;
+  unsigned int new_vdd_uv;
+
+  mutex_lock(&driver_lock);
+
+  for (i = 0; acpu_freq_tbl[i].speed.khz; i++) {
+    if (khz == 0)
+      new_vdd_uv = min(max((unsigned int)(acpu_freq_tbl[i].vdd_core + vdd_uv),
+        (unsigned int)HFPLL_MIN_VDD), (unsigned int)HFPLL_MAX_VDD);
+    else if ( acpu_freq_tbl[i].speed.khz == khz)
+      new_vdd_uv = min(max((unsigned int)vdd_uv,
+        (unsigned int)HFPLL_MIN_VDD), (unsigned int)HFPLL_MAX_VDD);
+    else 
+      continue;
+
+    acpu_freq_tbl[i].vdd_core = new_vdd_uv;
+  }
+  pr_warn("User voltage table modified!\n");
+  mutex_unlock(&driver_lock);
+}
+#endif
+
 #ifdef CONFIG_CPU_FREQ_MSM
 static struct cpufreq_frequency_table freq_table[NR_CPUS][30];
 
@@ -1996,7 +2042,7 @@ static void kraitv2_apply_vmin(struct acpu_level *tbl)
 unsigned long acpuclk_krait_power_collapse(void)
 {
 	unsigned long rate = acpuclk_get_rate(smp_processor_id());
-	acpuclk_8960_set_rate(smp_processor_id(), 384000, SETRATE_PC);
+	acpuclk_8960_set_rate(smp_processor_id(), 162000, SETRATE_PC);
 	return rate;
 }
 #endif
@@ -2202,8 +2248,8 @@ static struct acpuclk_data acpuclk_8960_data = {
 	.set_rate = acpuclk_8960_set_rate,
 	.get_rate = acpuclk_8960_get_rate,
 #ifdef CONFIG_APQ8064_ONLY
-	.power_collapse_khz = 384000,
-	.wait_for_irq_khz = 384000,
+	.power_collapse_khz = 162000,
+	.wait_for_irq_khz = 162000,
 #else
 	.power_collapse_khz = STBY_KHZ,
 	.wait_for_irq_khz = STBY_KHZ,

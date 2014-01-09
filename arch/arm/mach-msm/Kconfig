@@ -1752,6 +1752,11 @@ config MSM_CPU_FREQ_MIN
 
 endif # CPU_FREQ_MSM
 
+config USERSPACE_VOLTAGE_CONTROL
+	bool "Enable Userspace CPU Voltage Control"
+	default n
+	help
+	  Userspace Voltage Control
 
 config CPU_OVERCLOCK
         bool "Enable CPU Overclocking option"
@@ -2875,6 +2880,7 @@ config QUALCOMM_WLAN_PXO
 	bool "Use PXO for WLAN clock source"
 	help
 	  Use PXO for clock source of WLAN chip
+
 config FORCE_FAST_CHARGE
 	bool "Force AC charge mode at will"
 	default y
