@@ -26,7 +26,11 @@ static int a3xx_snapshot_shader_memory(struct kgsl_device *device,
 {
 	struct kgsl_snapshot_debug *header = snapshot;
 	unsigned int *data = snapshot + sizeof(*header);
+	unsigned int shader_read_len = SHADER_MEMORY_SIZE;
 	int i;
+
+	if (SHADER_MEMORY_SIZE > (device->shader_mem_len >> 2))
+		shader_read_len = (device->shader_mem_len >> 2);
 
 	if (remain < DEBUG_SECTION_SZ(SHADER_MEMORY_SIZE)) {
 		SNAPSHOT_ERR_NOMEM(device, "SHADER MEMORY");

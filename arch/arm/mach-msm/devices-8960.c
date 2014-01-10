@@ -3119,7 +3119,13 @@ struct msm_bus_scale_pdata grp2d1_bus_scale_pdata = {
 static struct resource kgsl_3d0_resources[] = {
 	{
 		.name = KGSL_3D0_REG_MEMORY,
-		.start = 0x04300000, 
+		.start = 0x04300000, /* GFX3D address */
+		.end = 0x0430ffff,
+		.flags = IORESOURCE_MEM,
+	},
+	{
+		.name = KGSL_3D0_SHADER_MEMORY,
+		.start = 0x04310000, /* Shader Mem Address (8960AB) */
 		.end = 0x0431ffff,
 		.flags = IORESOURCE_MEM,
 	},
@@ -3130,6 +3136,8 @@ static struct resource kgsl_3d0_resources[] = {
 		.flags = IORESOURCE_IRQ,
 	},
 };
+
+int kgsl_num_resources = ARRAY_SIZE(kgsl_3d0_resources);
 
 static const struct kgsl_iommu_ctx kgsl_3d0_iommu_ctxs[] = {
 	{ "gfx3d_user", 0 },
@@ -3144,6 +3152,7 @@ static struct kgsl_device_iommu_data kgsl_3d0_iommu_data[] = {
 		.physend = 0x07C00000 + SZ_1M - 1,
 	},
 };
+
 
 static struct kgsl_device_platform_data kgsl_3d0_pdata = {
 	.pwrlevel = {
@@ -3176,7 +3185,6 @@ static struct kgsl_device_platform_data kgsl_3d0_pdata = {
 	.num_levels = ARRAY_SIZE(grp3d_freq) + 1,
 	.set_grp_async = NULL,
 	.idle_timeout = HZ/12,
-	.nap_allowed = true,
 	.clk_map = KGSL_CLK_CORE | KGSL_CLK_IFACE | KGSL_CLK_MEM_IFACE,
 #ifdef CONFIG_MSM_BUS_SCALING
 	.bus_scale_table = &grp3d_bus_scale_pdata,
@@ -3243,7 +3251,6 @@ static struct kgsl_device_platform_data kgsl_2d0_pdata = {
 	.num_levels = ARRAY_SIZE(grp2d_freq) + 1,
 	.set_grp_async = NULL,
 	.idle_timeout = HZ/5,
-	.nap_allowed = true,
 	.clk_map = KGSL_CLK_CORE | KGSL_CLK_IFACE,
 #ifdef CONFIG_MSM_BUS_SCALING
 	.bus_scale_table = &grp2d0_bus_scale_pdata,
@@ -3310,7 +3317,6 @@ static struct kgsl_device_platform_data kgsl_2d1_pdata = {
 	.num_levels = ARRAY_SIZE(grp2d_freq) + 1,
 	.set_grp_async = NULL,
 	.idle_timeout = HZ/5,
-	.nap_allowed = true,
 	.clk_map = KGSL_CLK_CORE | KGSL_CLK_IFACE,
 #ifdef CONFIG_MSM_BUS_SCALING
 	.bus_scale_table = &grp2d1_bus_scale_pdata,

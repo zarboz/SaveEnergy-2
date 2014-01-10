@@ -137,8 +137,11 @@ struct kgsl_device {
 	unsigned long reg_phys;
 	void *reg_virt;
 	unsigned int reg_len;
+	unsigned long shader_mem_phys;
+	unsigned int shader_mem_len;
 	struct kgsl_memdesc memstore;
 	const char *iomemname;
+	const char *shadermemname;
 
 	struct kgsl_mh mh;
 	struct kgsl_mmu mmu;

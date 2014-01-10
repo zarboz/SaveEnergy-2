@@ -325,6 +325,8 @@ extern struct platform_device msm_kgsl_3d0;
 extern struct platform_device msm_kgsl_2d0;
 extern struct platform_device msm_kgsl_2d1;
 
+extern int kgsl_num_resources;
+
 extern struct platform_device msm_mipi_dsi1_device;
 extern struct platform_device mipi_dsi_device;
 extern struct platform_device msm_lvds_device;
