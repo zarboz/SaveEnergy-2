@@ -54,7 +54,10 @@
 #define SENSOR_ID_CHECKING_EN	1 << 16
 #define PSENSOR_STATUS		0x03
 #define PHONE_STATUS		0x04
-
+#ifdef CONFIG_TOUCHSCREEN_SYNAPTICS_SWEEP2WAKE
+#include <linux/input.h>
+//#include <linux/leds-pm8921.h>
+#endif
 enum {
 	SYNAPTICS_FLIP_X = 1UL << 0,
 	SYNAPTICS_FLIP_Y = 1UL << 1,
@@ -174,6 +177,11 @@ enum {
 	INTR_SOURCE,
 	FUNCTION
 };
+#ifdef CONFIG_TOUCHSCREEN_SYNAPTICS_SWEEP2WAKE
+/* Sweep2Wake */
+extern void sweep2wake_setdev(struct input_dev * input_device);
+extern void sweep2wake_setleddev(struct led_classdev * led_dev);
+#endif
 
 extern uint8_t getPowerKeyState(void);
 #endif 
