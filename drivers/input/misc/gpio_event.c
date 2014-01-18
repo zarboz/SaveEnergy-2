@@ -1,5 +1,5 @@
 /* drivers/input/misc/gpio_event.c
- *
+ * Modified by Zarboz
  * Copyright (C) 2007 Google, Inc.
  *
  * This software is licensed under the terms of the GNU General Public
@@ -20,16 +20,15 @@
 #include <linux/hrtimer.h>
 #include <linux/platform_device.h>
 #include <linux/slab.h>
-#include <mach/board_htc.h>
 #ifdef CONFIG_TOUCHSCREEN_SYNAPTICS_SWEEP2WAKE
 #include <linux/synaptics_i2c_rmi.h>
 #endif
+
 struct gpio_event {
 	struct gpio_event_input_devs *input_devs;
 	const struct gpio_event_platform_data *info;
 	struct early_suspend early_suspend;
 	void *state[0];
-	uint8_t rrm1_mode;
 };
 
 static int gpio_input_event(
@@ -79,8 +78,6 @@ static int gpio_event_call_all_func(struct gpio_event *ip, int func)
 			}
 			if (func == GPIO_EVENT_FUNC_RESUME && (*ii)->no_suspend)
 				continue;
-			if (func == GPIO_EVENT_FUNC_INIT)
-				(*ii)->rrm1_mode = ip->rrm1_mode;
 			ret = (*ii)->func(ip->input_devs, *ii, &ip->state[i],
 					  func);
 			if (ret) {
@@ -159,13 +156,6 @@ static int gpio_event_probe(struct platform_device *pdev)
 	ip->input_devs = (void*)&ip->state[event_info->info_count];
 	platform_set_drvdata(pdev, ip);
 
-	if ((get_debug_flag() & DEBUG_FLAG_DISABLE_PMIC_RESET) && event_info->cmcc_disable_reset) {
-		ip->rrm1_mode = 1;
-		KEY_LOGI("Lab Test RRM1 Mode");
-	} else {
-		ip->rrm1_mode = 0;
-	}
-
 	for (i = 0; i < dev_count; i++) {
 		struct input_dev *input_dev = input_allocate_device();
 		if (input_dev == NULL) {
@@ -180,10 +170,10 @@ static int gpio_event_probe(struct platform_device *pdev)
 		input_dev->event = gpio_input_event;
 		ip->input_devs->dev[i] = input_dev;
 #ifdef CONFIG_TOUCHSCREEN_SYNAPTICS_SWEEP2WAKE
-                if (!strcmp(input_dev->name, /*you may need to alter the keypad type depending on your board*/"device-keypad")) {
-                        sweep2wake_setdev(input_dev);
-                        printk(KERN_INFO "[sweep2wake]: set device %s\n", input_dev->name);
-                }
+		if (!strcmp(input_dev->name, "keypad_8930")) {
+			sweep2wake_setdev(input_dev);
+			printk(KERN_INFO "[sweep2wake]: set device %s\n", input_dev->name);
+		}
 #endif
 	}
 	ip->input_devs->count = dev_count;
@@ -276,4 +266,5 @@ module_exit(gpio_event_exit);
 
 MODULE_DESCRIPTION("GPIO Event Driver");
 MODULE_LICENSE("GPL");
+
 
